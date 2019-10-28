@@ -165,17 +165,21 @@ def get_cumulated_weights(weights):
 
 def get_new_train_set(train_set_x, train_set_y, weights):
     length = len(train_set_x)
-    new_train_set_x = pd.DataFrame(columns=['pclass', 'age', 'gender'])
-    new_train_set_y = pd.DataFrame(columns=['survived'])
     ind_list = []
     for i in range(length):
         ind_list.append(i)
+    new_ind = np.random.choice(ind_list, size = length, p = weights)
+    '''
     for i in range(length):
         ind = np.random.choice(ind_list, p = weights)
-        row = train_set_x.loc[ind, :]
-        new_train_set_x = new_train_set_x.append(row, ignore_index=True)
-        new_train_set_y.loc[i] = train_set_y.loc[ind]
+        new_ind.append(ind)
+    '''
+    #row = train_set_x.loc[ind, :]
+    #new_train_set_x = new_train_set_x.append(row, ignore_index=True)
+    new_train_set_x = train_set_x.iloc[new_ind].reset_index(drop=True)
+    new_train_set_y = train_set_y.iloc[new_ind].reset_index(drop=True)
     return new_train_set_x, new_train_set_y
+
 
 
 
@@ -358,7 +362,7 @@ def get_class(c_outputs, alpha, n):
 
 train_set_x = X_train
 train_set_y = Y_train
-num_iter = 3
+num_iter = 50
 # weights = pd.DataFrame(columns=['probability'])
 weights = []
 # print(weights)
@@ -382,8 +386,8 @@ for i in range(num_iter):
     new_train_set_x, new_train_set_y = get_new_train_set(train_set_x, train_set_y, weights)
 #   print(new_train_set_x)
 #   print(new_train_set_y)
-    new_train_set_x = new_train_set_x.iloc[:, :].reset_index(drop=True)
-    new_train_set_y = new_train_set_y.iloc[:, -1].reset_index(drop=True)
+#    new_train_set_x = new_train_set_x.iloc[:, :].reset_index(drop=True)
+#    new_train_set_y = new_train_set_y.iloc[:, -1].reset_index(drop=True)
     new_tree = get_tree(new_train_set_x, new_train_set_y, 0, None)
     trees.append(new_tree)
     validity = test_validity(new_tree, new_train_set_x, new_train_set_y)
