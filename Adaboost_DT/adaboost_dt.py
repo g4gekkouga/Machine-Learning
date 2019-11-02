@@ -250,6 +250,9 @@ def test_validity(tree, train_x, train_y):
 		    					else:
 		    						validity.append(0)
 		    						continue
+	for i in range(len(validity), len(train_x)):
+		validity.append(0)
+
 	return validity
 
 
@@ -257,7 +260,7 @@ def test_validity(tree, train_x, train_y):
 
 def get_epsilon(validity, weights):
     epsilon = 0
-    for i in range(len(weights)):
+    for i in range(len(validity)):
         if validity[i] == 0 :
             epsilon = epsilon + weights[i]
     return epsilon
@@ -276,8 +279,8 @@ def get_alpha(epsilon):
 def update_weights(validity, weights, alpha):
     new_weights = []
     new_val = 0
-    neg_alpha = -alpha
-    for i in range(len(weights)):
+    neg_alpha = -1*alpha
+    for i in range(len(validity)):
         if validity[i] == 0 :
             new_val = weights[i] * math.exp(alpha)
             new_weights.append(new_val)
@@ -330,6 +333,9 @@ def get_output(tree, test_x):
 		    					sev = tree[i][j][k][l][m][n]
 		    					output.append(sev)
 		    					continue
+	for i in range(len(output), len(test_x)):
+		output.append('yes')
+
 	return output
 
 
@@ -362,7 +368,7 @@ def get_class(c_outputs, alpha, n):
 
 train_set_x = X_train
 train_set_y = Y_train
-num_iter = 50
+num_iter = int(input("Enter number of iterations : "))
 # weights = pd.DataFrame(columns=['probability'])
 weights = []
 # print(weights)
@@ -384,21 +390,24 @@ for i in range(num_iter):
 #   cumulated_weights = get_cumulated_weights(weights)
 #   print(cumulated_weights)
     new_train_set_x, new_train_set_y = get_new_train_set(train_set_x, train_set_y, weights)
+#    print(new_train_set_y[0])
 #   print(new_train_set_x)
 #   print(new_train_set_y)
-#    new_train_set_x = new_train_set_x.iloc[:, :].reset_index(drop=True)
-#    new_train_set_y = new_train_set_y.iloc[:, -1].reset_index(drop=True)
+#    new_train_set_x = new_train_set_x.reset_index(drop=True)
+#    new_train_set_y = new_train_set_y.reset_index(drop=True)
     new_tree = get_tree(new_train_set_x, new_train_set_y, 0, None)
     trees.append(new_tree)
     validity = test_validity(new_tree, new_train_set_x, new_train_set_y)
-#    print(validity)
+#    print_tree(new_tree, 0)
+#    print(len(validity))
     new_epsilon = get_epsilon(validity, weights)
     epsilon.append(new_epsilon)
 #    print(new_epsilon)
     new_alpha = get_alpha(new_epsilon)
     alpha.append(new_alpha)
 #    print(new_alpha)
-    weights = update_weights(validity, weights, new_alpha)
+    validity_original = test_validity(new_tree, train_set_x, train_set_y)
+    weights = update_weights(validity_original, weights, new_alpha)
 #    print(weights)
     weights = normalize_weights(weights)
     
